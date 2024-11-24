@@ -3,7 +3,9 @@ html {
   -ms-text-size-adjust: 100%;
   font-family: sans-serif;
 }
-
+.w-webflow-badge{
+  visibility: hidden;
+}
 body {
   margin: 0;
 }
