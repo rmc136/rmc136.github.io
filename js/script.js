@@ -166,3 +166,102 @@ document.addEventListener("DOMContentLoaded", () => {
         t.innerHTML += n
 }
 );
+
+
+const gameArea = document.getElementById("game-area");
+const scoreDisplay = document.getElementById("score");
+const timerDisplay = document.getElementById("timer");
+const startButton = document.getElementById("start-button");
+const gameOverMessage = document.getElementById("game-over");
+const finalScoreDisplay = document.getElementById("final-score");
+const closeButton = document.getElementById("close-button");
+
+let score = 0;
+let timeLeft = 60;
+let gameInterval;
+let timerInterval;
+let gameOverTimeout;
+
+// Function to create targets
+function createTarget() {
+  const target = document.createElement("div");
+  target.classList.add("target");
+  target.style.top = `${Math.random() * (gameArea.clientHeight - 50)}px`;
+  target.style.animationDuration = `${2 + Math.random() * 3}s`;
+
+  // Add click event to targets
+  target.addEventListener("click", () => {
+    score += target.style.backgroundColor === "rgb(255, 215, 0)" ? 50 : 10; // Bonus for golden targets
+    scoreDisplay.textContent = score;
+    target.remove();
+  });
+
+  gameArea.appendChild(target);
+
+  // Remove target after animation ends
+  target.addEventListener("animationend", () => target.remove());
+
+  // Occasionally spawn a golden target
+  if (Math.random() < 0.1) {
+    target.style.backgroundColor = "#FFD700"; // Golden color
+  }
+}
+
+// Timer logic
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval);
+      clearInterval(gameInterval);
+      endGame();
+    }
+  }, 1000);
+}
+
+// End game function
+function endGame() {
+  // Stop the game and show the Game Over message
+  gameOverMessage.classList.remove("hidden");
+  gameOverMessage.style.display = "block";
+  finalScoreDisplay.textContent = score;
+
+  // Set a timeout to hide the message after 10 seconds
+  gameOverTimeout = setTimeout(() => {
+    gameOverMessage.style.display = "none";
+  }, 10000);
+
+  // Re-enable the start button
+  startButton.disabled = false;
+}
+
+// Start game function
+function startGame() {
+  // Reset score and timer
+  score = 0;
+  timeLeft = 60;
+  scoreDisplay.textContent = score;
+  timerDisplay.textContent = timeLeft;
+
+  // Hide the Game Over message
+  gameOverMessage.style.display = "none";
+  clearTimeout(gameOverTimeout); // Clear any pending timeout
+
+  // Start spawning targets and timer
+  gameInterval = setInterval(createTarget, 1000);
+  startTimer();
+
+  // Disable the start button during the game
+  startButton.disabled = true;
+}
+
+// Close the Game Over message immediately
+closeButton.addEventListener("click", () => {
+  gameOverMessage.style.display = "none";
+  clearTimeout(gameOverTimeout); // Prevent auto-hide logic from triggering later
+});
+
+// Attach event listener to the start button
+startButton.addEventListener("click", startGame);
